@@ -63,18 +63,18 @@ module Sprite
       
       combiner = ImageCombiner.new
       
-      dest_image = combiner.get_image(sources.shift)
-      results << combiner.image_properties(dest_image).merge(:x => 0, :y => 0, :group => name)
+      dest_image = combiner.image_properties(sources.shift)
+      results << dest_image.merge(:x => 0, :y => 0, :group => name)
       sources.each do |source|
-        source_image = combiner.get_image(source)
+        source_image = combiner.image_properties(source)
         if image['align'].to_s == 'horizontal'
-          x = dest_image.columns + spaced_by
+          x = dest_image[:width] + spaced_by
           y = 0
         else
           x = 0
-          y = dest_image.rows + spaced_by
+          y = dest_image[:height] + spaced_by
         end
-        results << combiner.image_properties(source_image).merge(:x => x, :y => y, :group => name)
+        results << source_image.merge(:x => x, :y => y, :group => name)
         dest_image = combiner.composite_images(dest_image, source_image, x, y)
       end
       

@@ -16,8 +16,7 @@ describe Sprite::Builder do
     context "and the sprite result image" do
       before(:all) do
         combiner = Sprite::ImageCombiner.new
-        @result_image = combiner.get_image("#{@output_path}/images/sprites/android-icons.png")
-        @result_properties = combiner.image_properties(@result_image)
+        @result_properties = combiner.image_properties("#{@output_path}/images/sprites/android-icons.png")
       end
       
       it "should be 48x2890" do
@@ -51,8 +50,7 @@ describe Sprite::Builder do
     context "and the sprite result image" do
       before(:all) do
         combiner = Sprite::ImageCombiner.new
-        @result_image = combiner.get_image("#{@output_path}/images/sprites/android-icons.png")
-        @result_properties = combiner.image_properties(@result_image)
+        @result_properties = combiner.image_properties("#{@output_path}/images/sprites/android-icons.png")
       end
       
       it "should be 2890x48" do

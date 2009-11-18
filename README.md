@@ -4,18 +4,14 @@
 
 ## INSTALL  ##
 
-### Install the `rmagick` gem ###
+### Install ImageMagick ###
 
-`sprite` currently requires the rmagick gem. to install it, use
+`sprite` requires the ImageMagick command line tools. to install it, use
 
-    gem install rmagick
+install it via macports:
 
-if you have any problems with the rmagick gem, install imagemagick via macports first:
-
-    sudo port install libxml2
     sudo port install ImageMagick  
 
-or via installer: http://github.com/maddox/magick-installer/tree/master
 
 ### Install the `sprite` gem ###
 

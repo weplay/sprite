@@ -16,6 +16,11 @@ module Sprite
     end
     @root
   end  
+  
+  def self.identify_cmd
+    "identify"
+  end
+  
 end
 
 require 'sprite/builder'
