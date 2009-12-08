@@ -180,6 +180,13 @@ module Sprite
       public_path(File.join(*path_parts), relative)
     end
     
+    def style_template_source_path(image, relative = false)
+      location = image["style_output_template"]
+      path_parts = []
+      path_parts << location
+      public_path(File.join(*path_parts), relative)
+    end
+    
     # get the disk path for a location within the public folder (if set)
     def public_path(location, relative = false)
       path_parts = []

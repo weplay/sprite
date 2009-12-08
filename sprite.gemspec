@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
      "lib/sprite/styles/sass_generator.rb",
      "lib/sprite/styles/sass_mixin_generator.rb",
      "lib/sprite/styles/sass_yml_generator.rb",
+     "lib/sprite/styles/templated_css_generator.rb",
      "rails/init.rb",
      "sprite.gemspec",
      "tasks/sprite_tasks.rake"
