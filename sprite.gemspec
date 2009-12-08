@@ -26,6 +26,8 @@ Gem::Specification.new do |s|
      "lib/sprite.rb",
      "lib/sprite/builder.rb",
      "lib/sprite/image_combiner.rb",
+     "lib/sprite/image_reader.rb",
+     "lib/sprite/image_resizer.rb",
      "lib/sprite/runner.rb",
      "lib/sprite/sass_extensions.rb",
      "lib/sprite/styles.rb",

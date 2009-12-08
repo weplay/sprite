@@ -13,5 +13,6 @@ images:
     format: png
     align: vertical
     spaced_by: 50
+    resize_to: 48x48
     sources:
       - android-icons/*.png

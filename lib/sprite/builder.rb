@@ -60,13 +60,19 @@ module Sprite
       name = image['name']
       format = image['format'] || config["default_format"]
       spaced_by = image['spaced_by'] || config["default_spacing"] || 0
+      resize_to = image['resize_to'] || config['resize_to']
+      resizer = ImageResizer.new(resize_to)
       
       combiner = ImageCombiner.new
+      first_image = ImageReader.read(sources.shift)
+      resizer.resize(first_image)
       
-      dest_image = combiner.get_image(sources.shift)
+      dest_image = first_image
       results << combiner.image_properties(dest_image).merge(:x => 0, :y => 0, :group => name)
+      
       sources.each do |source|
-        source_image = combiner.get_image(source)
+        source_image = ImageReader.read(source)
+        resizer.resize(source_image)
         if image['align'].to_s == 'horizontal'
           x = dest_image.columns + spaced_by
           y = 0

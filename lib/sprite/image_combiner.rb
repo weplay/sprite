@@ -17,9 +17,6 @@ module Sprite
     end
 
     # Image Utility Methods
-    def get_image(image_filename)
-      image = Magick::Image::read(image_filename).first
-    end
 
     def image_properties(image)
       {:name => File.basename(image.filename).split('.')[0], :width => image.columns, :height => image.rows}
