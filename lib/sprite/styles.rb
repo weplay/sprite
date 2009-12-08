@@ -12,7 +12,7 @@ module Sprite::Styles
     "sass_mixin" => "SassMixinGenerator",
     "sass_yml" => "SassYmlGenerator"
   }
-  
+
   def self.get(config)
     const_get(GENERATORS[config])
   rescue

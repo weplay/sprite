@@ -1,25 +1,11 @@
 require 'fileutils'
 module Sprite
   class Builder  
-    DEFAULT_CONFIG_PATH = 'config/sprite.yml'
-    
     attr_reader :config
     attr_reader :images
     
     def self.from_config(path = nil) 
-      results = {}
-      config_path = File.join(Sprite.root, path || DEFAULT_CONFIG_PATH)
-      
-      # read configuration
-      if File.exists?(config_path) 
-        begin
-          results = File.open(config_path) {|f| YAML::load(f)} || {}
-        rescue => e
-          puts "Error reading sprite config: #{config_path}"
-          puts e.to_s
-        end
-      end
-
+      results = Config.read_config(path)
       new(results["config"], results["images"])
     end
 
@@ -28,7 +14,9 @@ module Sprite
       set_config_defaults
       
       @images = images || []
-      set_image_defaults
+      if @images.empty?
+        @images = default_images
+      end
       expand_image_paths
       
       # initialize sprite files
@@ -52,47 +40,43 @@ module Sprite
     end
     
     protected
-    def write_image(image)
+    def write_image(image_info)
       results = []
-      sources = image['sources'].to_a
+      image_config = ImageConfig.new(image_info, config)
+      sources = image_config.sources
       return unless sources.length > 0
       
-      name = image['name']
-      format = image['format'] || config["default_format"]
-      spaced_by = image['spaced_by'] || config["default_spacing"] || 0
-      resize_to = image['resize_to'] || config['resize_to']
-      resizer = ImageResizer.new(resize_to)
-      
+      name = image_config.name
+      resizer = ImageResizer.new(image_config.resize_to)
       combiner = ImageCombiner.new
+      
+      # Let's get the sprite started with the first image
       first_image = ImageReader.read(sources.shift)
       resizer.resize(first_image)
       
       dest_image = first_image
       results << combiner.image_properties(dest_image).merge(:x => 0, :y => 0, :group => name)
       
+      # Now let's add the rest of the images in turn
       sources.each do |source|
         source_image = ImageReader.read(source)
         resizer.resize(source_image)
-        if image['align'].to_s == 'horizontal'
-          x = dest_image.columns + spaced_by
+        if image_config.horizontal_layout?
+          x = dest_image.columns + image_config.spaced_by
           y = 0
           align = "horizontal"
         else
           x = 0
-          y = dest_image.rows + spaced_by
+          y = dest_image.rows + image_config.spaced_by
           align = "vertical"
         end
         results << combiner.image_properties(source_image).merge(:x => -x, :y => -y, :group => name, :align => align)
         dest_image = combiner.composite_images(dest_image, source_image, x, y)
       end
+
+      ImageWriter.new(config).write(dest_image, name, image_config.format)
       
-      # set up path
-      path = image_output_path(name, format)
-      FileUtils.mkdir_p(File.dirname(path))
-      
-      # write sprite image file to disk
-      dest_image.write(path)
-      @sprite_files["#{name}.#{format}"] = results
+      @sprite_files["#{name}.#{image_config.format}"] = results
     end
     
     def write_styles
@@ -120,10 +104,9 @@ module Sprite
     end
     
     # if no image configs are detected, set some intelligent defaults
-    def set_image_defaults
-      return unless @images.size == 0
-      
+    def default_images
       sprites_path = image_source_path("sprites")
+      collection = []
       
       if File.exists?(sprites_path)
         Dir.glob(File.join(sprites_path, "*")) do |dir|
@@ -131,7 +114,7 @@ module Sprite
           source_name = File.basename(dir)
 
           # default to finding all png, gif, jpg, and jpegs within the directory
-          images << {
+          collection << {
             "name" => source_name,
             "sources" => [
               File.join("sprites", source_name, "*.png"),
@@ -142,6 +125,7 @@ module Sprite
           }
         end
       end
+      collection
     end
     
     # expands out sources, taking the Glob paths and turning them into separate entries in the array
@@ -161,51 +145,22 @@ module Sprite
       unless path.include?(".#{file_ext}")
         path = "#{path}.#{file_ext}"
       end
-      public_path(path, relative)
+      Config.new(config).public_path(path, relative)
     end
-    
-    # get the disk path for a location within the image output folder
-    def image_output_path(name, format, relative = false)
-      path_parts = []
-      path_parts << chop_trailing_slash(config['image_output_path']) if path_present?(config['image_output_path'])
-      path_parts << "#{name}.#{format}"
-      public_path(File.join(*path_parts), relative)
-    end
-    
+        
     # get the disk path for an image source file
     def image_source_path(location, relative = false)
       path_parts = []
-      path_parts << chop_trailing_slash(config["image_source_path"]) if path_present?(config['image_source_path'])
+      path_parts << Config.chop_trailing_slash(config["image_source_path"]) if Config.path_present?(config['image_source_path'])
       path_parts << location
-      public_path(File.join(*path_parts), relative)
+      Config.new(config).public_path(File.join(*path_parts), relative)
     end
     
     def style_template_source_path(image, relative = false)
       location = image["style_output_template"]
       path_parts = []
       path_parts << location
-      public_path(File.join(*path_parts), relative)
-    end
-    
-    # get the disk path for a location within the public folder (if set)
-    def public_path(location, relative = false)
-      path_parts = []
-      path_parts << Sprite.root unless relative
-      path_parts << chop_trailing_slash(config['public_path']) if path_present?(config['public_path'])
-      path_parts << location
-      
-      File.join(*path_parts)
-    end
-        
-    # chop off the trailing slash on a directory path (if it exists)
-    def chop_trailing_slash(path)
-      path = path[0...-1] if path[-1] == File::SEPARATOR
-      path
-    end
-    
-    # check if the path is set
-    def path_present?(path)
-      path.to_s.strip != ""
+      Config.new(config).public_path(File.join(*path_parts), relative)
     end
   end
 end

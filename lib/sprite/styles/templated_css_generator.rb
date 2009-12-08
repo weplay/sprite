@@ -23,7 +23,7 @@ module Sprite
                   height = sprite[:height]
                   left = sprite[:x]
                   top = sprite[:y]
-                  image_path = @builder.send :image_output_path, image['name'], image['format']
+                  image_path = ImageWriter.new(@builder.config).image_output_path(image['name'], image['format'])
                   f.puts erb_template.result(binding)
                 end
               end

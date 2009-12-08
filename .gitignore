@@ -1,3 +1,4 @@
 .DS_Store
 spec/output
 pkg
+rspec_autotest.rb
