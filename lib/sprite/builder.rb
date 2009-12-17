@@ -74,7 +74,7 @@ module Sprite
         dest_image = combiner.composite_images(dest_image, source_image, x, y)
       end
 
-      ImageWriter.new(config).write(dest_image, name, image_config.format)
+      ImageWriter.new(config).write(dest_image, name, image_config.format, image_config.quality, image_config.background_color)
       
       @sprite_files["#{name}.#{image_config.format}"] = results
     end
