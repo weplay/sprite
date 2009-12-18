@@ -3,7 +3,9 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe Sprite::ImageCombiner do
   before(:all) do
     # build a sprite object with empty config
-    @combiner = Sprite::ImageCombiner.new
+    image_config = Object.new
+    def image_config.background_color; nil; end
+    @combiner = Sprite::ImageCombiner.new(image_config)
     
     @image_paths = {
       :good => "#{Sprite.root}/resources/images/topics/good-topic.gif",

@@ -10,7 +10,7 @@ describe Sprite::ImageReader do
 
   context "read" do
     it "should get a image from disk" do
-      Sprite::ImageReader.read(@image_paths[:good]).class.should == Magick::Image
+      Sprite::ImageReader.read(@image_paths[:good]).class.name.should == 'Magick::Image'
     end
   end
 end

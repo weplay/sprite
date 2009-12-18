@@ -1,10 +1,10 @@
 require 'fileutils'
 module Sprite
-  class Builder  
+  class Builder
     attr_reader :config
     attr_reader :images
-    
-    def self.from_config(path = nil) 
+
+    def self.from_config(path = nil)
       results = Config.read_config(path)
       new(results["config"], results["images"])
     end
@@ -12,51 +12,51 @@ module Sprite
     def initialize(config = nil, images = nil)
       @config = config || {}
       set_config_defaults
-      
+
       @images = images || []
       if @images.empty?
         @images = default_images
       end
       expand_image_paths
-      
+
       # initialize sprite files
       @sprite_files = {}
     end
-  
-    def build    
+
+    def build
       @sprite_files = {}
-      
+
       if images.size > 0
         # create images
         images.each do |image|
           write_image(image)
         end
-    
+
         if @sprite_files.values.length > 0
           # write css
           write_styles
         end
       end
     end
-    
+
     protected
     def write_image(image_info)
       results = []
       image_config = ImageConfig.new(image_info, config)
       sources = image_config.sources
       return unless sources.length > 0
-      
+
       name = image_config.name
       resizer = ImageResizer.new(image_config.resize_to)
-      combiner = ImageCombiner.new
-      
+      combiner = ImageCombiner.new(image_config)
+
       # Let's get the sprite started with the first image
       first_image = ImageReader.read(sources.shift)
       resizer.resize(first_image)
-      
+
       dest_image = first_image
       results << combiner.image_properties(dest_image).merge(:x => 0, :y => 0, :group => name)
-      
+
       # Now let's add the rest of the images in turn
       sources.each do |source|
         source_image = ImageReader.read(source)
@@ -75,21 +75,21 @@ module Sprite
       end
 
       ImageWriter.new(config).write(dest_image, name, image_config.format, image_config.quality, image_config.background_color)
-      
+
       @sprite_files["#{name}.#{image_config.format}"] = results
     end
-    
+
     def write_styles
       style = Styles.get(config["style"]).new(self)
-      
+
       # use the absolute style output path to make sure we have the directory set up
       path = style_output_path(style.extension, false)
       FileUtils.mkdir_p(File.dirname(path))
-      
+
       # send the style the relative path
       style.write(style_output_path(style.extension, true), @sprite_files)
     end
-    
+
     # sets all the default values on the config
     def set_config_defaults
       @config['style']              ||= 'css'
@@ -102,12 +102,12 @@ module Sprite
       @config["sprites_class"]      ||= 'sprites'
       @config["default_spacing"]    ||= 0
     end
-    
+
     # if no image configs are detected, set some intelligent defaults
     def default_images
       sprites_path = image_source_path("sprites")
       collection = []
-      
+
       if File.exists?(sprites_path)
         Dir.glob(File.join(sprites_path, "*")) do |dir|
           next unless File.directory?(dir)
@@ -127,7 +127,7 @@ module Sprite
       end
       collection
     end
-    
+
     # expands out sources, taking the Glob paths and turning them into separate entries in the array
     def expand_image_paths
       # cycle through image sources and expand out globs
@@ -138,7 +138,7 @@ module Sprite
         }.flatten.compact
       end
     end
-    
+
     # get the disk path for the style output file
     def style_output_path(file_ext, relative = false)
       path = config['style_output_path']
@@ -147,7 +147,7 @@ module Sprite
       end
       Config.new(config).public_path(path, relative)
     end
-        
+
     # get the disk path for an image source file
     def image_source_path(location, relative = false)
       path_parts = []
@@ -155,7 +155,7 @@ module Sprite
       path_parts << location
       Config.new(config).public_path(File.join(*path_parts), relative)
     end
-    
+
     def style_template_source_path(image, relative = false)
       location = image["style_output_template"]
       path_parts = []
