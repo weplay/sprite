@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jacques Crocker"]
-  s.date = %q{2009-11-19}
+  s.date = %q{2010-01-14}
   s.default_executable = %q{sprite}
   s.description = %q{sprite is a rails/merb plugin that generates sprites for css, sass}
   s.email = %q{merbjedi@gmail.com}
@@ -25,9 +25,12 @@ Gem::Specification.new do |s|
      "bin/sprite",
      "lib/sprite.rb",
      "lib/sprite/builder.rb",
+     "lib/sprite/config.rb",
      "lib/sprite/image_combiner.rb",
+     "lib/sprite/image_config.rb",
      "lib/sprite/image_reader.rb",
      "lib/sprite/image_resizer.rb",
+     "lib/sprite/image_writer.rb",
      "lib/sprite/runner.rb",
      "lib/sprite/sass_extensions.rb",
      "lib/sprite/styles.rb",
